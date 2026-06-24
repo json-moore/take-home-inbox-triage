@@ -27,7 +27,7 @@ ROUTING: dict[str, list[str]] = {
 }
 
 # Action kinds your plan may contain.
-ACTION_KINDS = ("send_reply", "create_contact", "create_deal")
+ACTION_KINDS = ("send_reply", "create_lead")
 
 
 @dataclass
@@ -65,10 +65,7 @@ class TriageClient:
     def send_reply(self, *, to: str, subject: str, body: str, in_reply_to: str | None = None) -> dict:
         raise NotImplementedError
 
-    def create_contact(self, *, name: str, email: str, company: str | None = None) -> dict:
-        raise NotImplementedError
-
-    def create_deal(self, *, title: str, contact_email: str, estimated_seats: int | None = None) -> dict:
+    def create_lead(self, *, name: str, email: str, company: str | None = None, summary: str | None = None) -> dict:
         raise NotImplementedError
 
 

@@ -35,6 +35,9 @@ emails so a human never starts from a blank page. You're building the first skil
 This repo is a scaffold: a mock REST API (inbox + outbound mail + CRM), email fixtures,
 env config, and a **stubbed skill module**. Build the skill.
 
+> **You need no external accounts.** The mock API stands in for Gmail and the CRM — it runs
+> locally with `make serve`. The only thing you bring is your own LLM API key.
+
 ## Requirements
 
 1. **Ingest** the incoming emails from the mock `GET /inbox` endpoint.
@@ -45,7 +48,7 @@ env config, and a **stubbed skill module**. Build the skill.
    |---|---|
    | `billing` | draft a reply (`POST /mail/send`) |
    | `bug_report` | draft a reply (`POST /mail/send`) |
-   | `sales_lead` | draft a reply **and** create a CRM contact + deal (`POST /crm/contact`, `POST /crm/deal`) |
+   | `sales_lead` | draft a reply **and** create a CRM lead (`POST /crm/lead`) |
    | `spam` | no action — log and drop |
 
 4. **Human-in-the-loop gate.** *No external action (send reply, create CRM record) may
@@ -62,7 +65,7 @@ env config, and a **stubbed skill module**. Build the skill.
 ## What we hand you
 
 ```
-mock_api/server.py     FastAPI mock: /inbox, /mail/send, /crm/contact, /crm/deal
+mock_api/server.py     FastAPI mock: /inbox, /mail/send, /crm/lead
 fixtures/emails.json   the inbox the agent triages
 src/triage_skill.py    STUB — signatures + TODOs, no logic. This is where you work.
 env.example            the env vars you need (copy to .env)

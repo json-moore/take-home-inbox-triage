@@ -33,8 +33,7 @@ app = FastAPI(title="Inbox Triage — Mock Client API", version="1.0.0")
 # In-memory record of everything the agent has written, so the grader (and you)
 # can inspect side effects. Resets on restart.
 _sent_mail: list[dict] = []
-_contacts: list[dict] = []
-_deals: list[dict] = []
+_leads: list[dict] = []
 
 
 def _bearer(authorization: str | None) -> str:
@@ -67,16 +66,11 @@ class Reply(BaseModel):
     in_reply_to: str | None = None
 
 
-class Contact(BaseModel):
+class Lead(BaseModel):
     name: str
     email: str
     company: str | None = None
-
-
-class Deal(BaseModel):
-    title: str
-    contact_email: str
-    estimated_seats: int | None = None
+    summary: str | None = None
 
 
 @app.get("/inbox")
@@ -91,24 +85,17 @@ def send_mail(reply: Reply, _: None = Depends(require_write)) -> dict:
     return {"status": "sent", **record}
 
 
-@app.post("/crm/contact")
-def create_contact(contact: Contact, _: None = Depends(require_write)) -> dict:
-    record = {"id": f"contact-{len(_contacts) + 1}", **contact.model_dump()}
-    _contacts.append(record)
-    return {"status": "created", **record}
-
-
-@app.post("/crm/deal")
-def create_deal(deal: Deal, _: None = Depends(require_write)) -> dict:
-    record = {"id": f"deal-{len(_deals) + 1}", **deal.model_dump()}
-    _deals.append(record)
+@app.post("/crm/lead")
+def create_lead(lead: Lead, _: None = Depends(require_write)) -> dict:
+    record = {"id": f"lead-{len(_leads) + 1}", **lead.model_dump()}
+    _leads.append(record)
     return {"status": "created", **record}
 
 
 @app.get("/_audit")
 def audit() -> dict:
     """Inspect side effects produced so far (handy while you build)."""
-    return {"sent_mail": _sent_mail, "contacts": _contacts, "deals": _deals}
+    return {"sent_mail": _sent_mail, "leads": _leads}
 
 
 if __name__ == "__main__":
