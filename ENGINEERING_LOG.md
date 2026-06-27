@@ -9,7 +9,7 @@
 
 **Pre-setup/Reading requirements = 1 hr**
 
-**Coding/Cleanup/Wrapup =** 
+**Coding/Cleanup/Wrapup =** 2.1 hr (personally timed) + .2 hr (technical difficulties)
 
 ---
 
