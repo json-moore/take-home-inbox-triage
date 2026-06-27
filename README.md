@@ -7,22 +7,24 @@
 ## The rules
 
 - **Time cap: 2 hours.** Pick a single uninterrupted block. A clean, working *core* beats a
-  sprawling unfinished pile — and we mean the cap. (Suggested split below.)
+sprawling unfinished pile — and we mean the cap. (Suggested split below.)
 - **Use AI heavily.** This is the job. Cursor, Claude Code, whatever you run day-to-day.
-  We are **not** testing whether you can hand-write Python. We're testing how well you
-  *direct* AI to build correct, secure software under a deadline. Treat the AI like a team
-  of engineers you're managing.
+We are **not** testing whether you can hand-write Python. We're testing how well you
+*direct* AI to build correct, secure software under a deadline. Treat the AI like a team
+of engineers you're managing.
 - We explicitly do **not** penalize AI use. We reward *managed* AI use.
 - **"Done" is yours to define.** There's no hidden test suite grading you to a spec. We've
-  left room on purpose — show us your judgment about what matters and where to spend effort.
+left room on purpose — show us your judgment about what matters and where to spend effort.
 
 ## How to spend your two hours
 
-| Time | Focus |
-|---|---|
-| **~60 min** | **Build** the skill against the requirements below. |
-| **~30 min** | **Test / verify** it however you see fit — make sure it actually works. |
+
+| Time        | Focus                                                                                            |
+| ----------- | ------------------------------------------------------------------------------------------------ |
+| **~60 min** | **Build** the skill against the requirements below.                                              |
+| **~30 min** | **Test / verify** it however you see fit — make sure it actually works.                          |
 | **~30 min** | **Wrap up the deliverables** — clean up the repo, fill in the engineering log, record your Loom. |
+
 
 Budget for the wrap-up; don't let it get squeezed. We care as much about how you finish and
 communicate as about the code itself.
@@ -44,23 +46,23 @@ env config, and a **stubbed skill module**. Build the skill.
 2. **Classify** each email into exactly one of: `billing`, `bug_report`, `sales_lead`, `spam`.
 3. **Draft an action** per the routing table:
 
-   | Classification | Action |
-   |---|---|
-   | `billing` | draft a reply to the customer (`POST /mail/send`) |
-   | `bug_report` | alert the engineering team (`POST /slack/alert`, channel `#engineering`) |
-   | `sales_lead` | draft a reply **and** create a CRM lead (`POST /mail/send`, `POST /crm/lead`) |
-   | `spam` | no action — log and drop |
+  | Classification | Action                                                                        |
+  | -------------- | ----------------------------------------------------------------------------- |
+  | `billing`      | draft a reply to the customer (`POST /mail/send`)                             |
+  | `bug_report`   | alert the engineering team (`POST /slack/alert`, channel `#engineering`)      |
+  | `sales_lead`   | draft a reply **and** create a CRM lead (`POST /mail/send`, `POST /crm/lead`) |
+  | `spam`         | no action — log and drop                                                      |
 
 4. **Human-in-the-loop gate.** *No external action (send reply, create CRM record) may
-   execute without explicit human approval.* The skill **proposes**, a human **approves**,
+  execute without explicit human approval.* The skill **proposes**, a human **approves**,
    and only then does it call the write endpoint. Design this gate.
 5. **Least privilege & secrets.** The spam path must never hold write credentials. All
-   tokens come from the environment — never hardcoded. The write scope is used only after
+  tokens come from the environment — never hardcoded. The write scope is used only after
    approval.
 6. **Verify your work.** How you prove it works — tests, a demo script, manual checks — is
-   up to you. We want to see how you build confidence in your own output.
+  up to you. We want to see how you build confidence in your own output.
 7. **README the client could read.** Append a short section below: what it does, how to
-   run it, and the one design decision you're proudest of.
+  run it, and the one design decision you're proudest of.
 
 ## What we hand you
 
@@ -85,10 +87,10 @@ make serve                    # terminal 1 — starts the mock API on :8099
 ## Deliverables (submit all three)
 
 1. **A link to your GitHub repo.** Fork this repo, push your edits, and share the URL
-   with us. (Public, or private with us added as collaborators — your call.)
-2. **`ENGINEERING_LOG.md`**, filled in (one page) — how you directed the work.
+  with us. (Public, or private with us added as collaborators — your call.)
+2. `**ENGINEERING_LOG.md**`, filled in (one page) — how you directed the work.
 3. **A Loom recording (required, ≤5 min).** Walk us through what you built, demo it
-   running, and call out a decision or two you're proud of. This is where we see your
+  running, and call out a decision or two you're proud of. This is where we see your
    communication and how completely you finished — treat it like showing a client.
 
 ## How we evaluate
@@ -102,4 +104,69 @@ Questions before you start? Email us. Once you open the scaffold, the clock is y
 
 ---
 
-<!-- ↓↓↓ CANDIDATE: add your "README the client could read" section here ↓↓↓ -->
+
+
+## Inbox Triage Agent — Client Overview
+
+### What it does
+
+This agent triages your incoming customer emails so your team never starts from a blank page. For each message it:
+
+1. **Fetches** emails from the inbox
+2. **Classifies** them with AI into one of four categories: billing inquiry, bug report, sales lead, or spam
+3. **Proposes an action** based on that classification — for example, a draft reply, an engineering alert, or a CRM lead
+4. **Waits for a human** to approve or deny each proposed action
+5. **Executes only approved actions** — sending mail, posting to Slack, or creating a CRM record
+
+Spam is logged and dropped with no outbound action. Every non-spam action is shown in plain English before anyone approves it.
+
+
+| Classification | What the agent proposes                 |
+| -------------- | --------------------------------------- |
+| Billing        | Draft a reply to the customer           |
+| Bug report     | Alert `#engineering` on Slack           |
+| Sales lead     | Draft a reply **and** create a CRM lead |
+| Spam           | No action — log and drop                |
+
+
+### How to run it
+
+**Prerequisites:** Python 3.11+, an Anthropic API key, and a local `.env` file (copy from `env.example`).
+
+```bash
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp env.example .env                                 # Windows: copy env.example .env
+```
+
+Fill in `.env` with your `ANTHROPIC_API_KEY`, `READ_TOKEN`, and `WRITE_TOKEN`.
+
+**Terminal 1 — start the mock API:**
+
+```bash
+make serve
+```
+
+**Terminal 2 — run the agent:**
+
+```bash
+# Interactive: AI classification + approve/deny each action
+py -3 test_triage.py --use-ai --interactive
+
+# Non-interactive smoke test (deny all actions, no side effects)
+py -3 test_triage.py --use-ai --deny-all
+```
+
+**Check side effects** (sent mail, alerts, leads):
+
+```bash
+make audit
+```
+
+### Design decision I'm proudest of
+
+**Separate read and write credentials, with human approval as the only write path.**
+
+The agent runs with a **read-only** client to fetch and classify mail. Spam never receives write credentials at all. The write token is loaded from the environment **only inside `execute()`**, and **only after** a human explicitly approves an action.
+
+That gives you two guarantees in one design: nothing leaves the building without a person saying yes, and the riskiest credentials are never in scope during classification or spam handling.
